@@ -17,19 +17,15 @@ export default class ContextStore {
         this.isAuth = bool
     }
 
-    login(username: string, password: string): Promise<IAuthResponse> {
+    login(username: string, password: string): Promise<IAuthResponse | IErrorResponse> {
         return new Promise((resolve, reject) => {
             AuthService.login(username, password)
                 .then((res: AxiosResponse)  => {
-                    setTimeout(() => {
-                        this.setAuth(true);
-                        resolve((res.data as IAuthResponse))
-                    }, 1000);
+                    this.setAuth(true);
+                    return resolve(res.data as IAuthResponse)
                 })
                 .catch((err: AxiosError) => {
-                    setTimeout(() => {
-                        reject(ErrorFactory.make(err));
-                    }, 1000);
+                    return reject(ErrorFactory.make(err));
                 });
         })
     }

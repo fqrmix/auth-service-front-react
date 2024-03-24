@@ -6,5 +6,5 @@ export interface IAuthResponse extends IApiResponse {
 }
 
 export interface IErrorResponse extends IApiResponse {
-    errors: string[];
+    errors: any[];
 }

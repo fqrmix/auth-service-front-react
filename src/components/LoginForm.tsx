@@ -1,16 +1,17 @@
+import 'react-toastify/dist/ReactToastify.css';
 import React, { FC, useContext, useState } from "react";
 import { Context } from "..";
 import { Bounce, toast, ToastContainer } from "react-toastify";
-import { IErrorResponse } from "../models/IAuthResponse";
+import queryString from 'query-string';
+import LoadingButton from '@mui/lab/LoadingButton';
+import KeyOutlinedIcon from '@mui/icons-material/KeyOutlined';
+
 import { 
     Avatar, Box, 
     Container, createTheme, CssBaseline, 
     TextField, ThemeProvider, Typography 
 } from "@mui/material";
-import 'react-toastify/dist/ReactToastify.css';
-import queryString from 'query-string';
-import LoadingButton from '@mui/lab/LoadingButton';
-import KeyOutlinedIcon from '@mui/icons-material/KeyOutlined';
+import { IErrorResponse } from '../models/IAuthResponse';
 
 
 export const LoginForm: FC = () => {
@@ -22,9 +23,9 @@ export const LoginForm: FC = () => {
         event.preventDefault();
         setIsButtonDisabled(true)
         const data = new FormData(event.currentTarget);
-        contextStore.login(
-            data.get('username')?.toString()!,
-            data.get('password')?.toString()!)
+        const username = (data.get('username') || '').toString();
+        const password = (data.get('password') || '' ).toString();
+        contextStore.login(username, password)
             .then(() => {
                 toast.success('Auth was successfull. Redirecting...')
                 let redirectUrl = queryString.parse(window.location.search).redirectUrl
@@ -36,8 +37,22 @@ export const LoginForm: FC = () => {
                 }, 3000);
                 
             })
-            .catch(apiError => {
-                toast.error(`${apiError.message}`)
+            .catch((apiError: IErrorResponse) => {
+                console.log(apiError)
+                const errorMSG = ( apiError: IErrorResponse ) => (
+                    <>
+                        {apiError.message}
+                        <ul>
+                            {
+                                apiError.errors.map(error => {
+                                    return <li>{error.description}</li>
+                                })
+                            }
+                        </ul>
+                    </>
+                );
+                toast.error(errorMSG(apiError));
+
                 setIsButtonDisabled(false);
             })
     };
@@ -47,7 +62,7 @@ export const LoginForm: FC = () => {
             <Container component="main" maxWidth="xs">
                 <ToastContainer
                     position="top-right"
-                    autoClose={5000}
+                    autoClose={2500}
                     hideProgressBar={false}
                     newestOnTop={false}
                     closeOnClick
