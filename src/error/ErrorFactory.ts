@@ -11,14 +11,24 @@ export default class ErrorFactory {
                 type: 'error',
                 message: 'No response from the server',
                 code: 'UnknownError',
-                errors: ['No response from the server']
+                errors: [
+                    {  
+                        error: 'Unknown Error',
+                        description: 'От удаленного сервера не было получено ответа'
+                    }
+                ]
             }
         } else {
             return {
                 type: 'error',
                 message: 'Interanl Server Error',
                 code: 'InteranlServerError',
-                errors: ['Interanl Server Error']
+                errors: [
+                    {  
+                        error: 'Interanl Server Error',
+                        description: 'Произошла внутренняя ошибка сервера'
+                    }
+                ]
             }
         }
     }

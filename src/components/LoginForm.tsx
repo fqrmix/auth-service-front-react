@@ -1,5 +1,5 @@
 import 'react-toastify/dist/ReactToastify.css';
-import React, { FC, useContext, useState } from "react";
+import React, { FC, useContext, useEffect, useState } from "react";
 import { Context } from "..";
 import { Bounce, toast, ToastContainer } from "react-toastify";
 import queryString from 'query-string';
@@ -19,6 +19,13 @@ export const LoginForm: FC = () => {
     const defaultTheme = createTheme();
     const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
+    useEffect(() => {
+        let errorMessage = queryString.parse(window.location.search).errorMessage
+        if(errorMessage) {
+            toast.warn(errorMessage, {containerId: 'bottomCenter'});
+        }
+    }, [])
+
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setIsButtonDisabled(true)
@@ -27,7 +34,7 @@ export const LoginForm: FC = () => {
         const password = (data.get('password') || '' ).toString();
         contextStore.login(username, password)
             .then(() => {
-                toast.success('Auth was successfull. Redirecting...')
+                toast.success('Auth was successfull. Redirecting...', {containerId: 'topRight'})
                 let redirectUrl = queryString.parse(window.location.search).redirectUrl
                 if(!redirectUrl) {
                     redirectUrl = 'fqrmix.ru'
@@ -40,18 +47,20 @@ export const LoginForm: FC = () => {
             .catch((apiError: IErrorResponse) => {
                 console.log(apiError)
                 const errorMSG = ( apiError: IErrorResponse ) => (
-                    <>
-                        {apiError.message}
-                        <ul>
-                            {
-                                apiError.errors.map(error => {
-                                    return <li>{error.description}</li>
-                                })
-                            }
-                        </ul>
-                    </>
+                    <div>
+                        { apiError.message }
+                        { apiError.errors.length > 0 &&
+                            <ul>
+                                {
+                                    apiError.errors.map(error => {
+                                        return <li key={error.error}>{error.description}</li>
+                                    })
+                                }
+                            </ul>
+                        }
+                    </div>
                 );
-                toast.error(errorMSG(apiError));
+                toast.error(errorMSG(apiError), {containerId: 'topRight'});
 
                 setIsButtonDisabled(false);
             })
@@ -61,6 +70,8 @@ export const LoginForm: FC = () => {
         <ThemeProvider theme={defaultTheme}>
             <Container component="main" maxWidth="xs">
                 <ToastContainer
+                    containerId="topRight"
+                    style={{ width: "fit-content" }}
                     position="top-right"
                     autoClose={2500}
                     hideProgressBar={false}
@@ -116,6 +127,21 @@ export const LoginForm: FC = () => {
                         >
                             Sign In
                         </LoadingButton>
+                        <ToastContainer
+                            containerId="bottomCenter"
+                            style={{ width: "fit-content" }}
+                            position="bottom-center"
+                            autoClose={2500}
+                            hideProgressBar={false}
+                            newestOnTop={false}
+                            closeOnClick
+                            rtl={false}
+                            pauseOnFocusLoss={false}
+                            draggable
+                            pauseOnHover={false}
+                            theme="light"
+                            transition={Bounce}
+                        />
                     </Box>
                 </Box>
             </Container>
